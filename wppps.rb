@@ -30,8 +30,8 @@ def generate_requests(hydra, xml_rpc, valid_blog_post, target)
 end
 
 hydra = Typhoeus::Hydra.new(:max_concurrency => 10)
-xml_rpc = "http://192.168.1.6/wordpress/xmlrpc.php"
-valid_blog_post = "http://192.168.1.6/wordpress/2012/09/12/hello-world/"
+xml_rpc = "http://10.211.55.8/wordpress/xmlrpc.php"
+valid_blog_post = "http://10.211.55.8/wordpress/blog/2012/09/15/hello-world/"
 target = "http://www.letmeoutofyour.net"
 generate_requests(hydra, xml_rpc, valid_blog_post, target)
 hydra.run

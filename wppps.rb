@@ -26,6 +26,22 @@ Usage: wppp.rb [OPTION] ... XMLRPCS
   exit
 end
 
+def colorize(text, color_code)
+  "\e[#{color_code}m#{text}\e[0m"
+end
+
+def red(text)
+  colorize(text, 31)
+end
+
+def green(text)
+  colorize(text, 32)
+end
+
+def yellow(text)
+  colorize(text, 33)
+end
+
 def logo
   puts
   puts "   _      __            __                       ___  _           __            __"
@@ -119,9 +135,9 @@ def generate_requests(xml_rpcs, target)
       # Closed: <value><int>16</int></value>
       closed_match = response.body.match(/<value><int>16<\/int><\/value>/i)
       if closed_match.nil?
-        puts "Port #{i} is open"
+        puts green("Port #{i} is open")
       else
-        puts "Port #{i} is closed"
+        puts yellow("Port #{i} is closed")
       end
       if @verbose
         puts response.code

@@ -6,7 +6,8 @@ Using this feature you can scan other hosts on the intra- or internet via this s
 You can also use this feature for some kind of distributed port scanning:
 You can scan a single host using multiple Wordpress Blogs exposing this API.
 
-Examples:
+Examples
+========
 Quick-scan a target via a blog:
 ```
 ruby wppps.rb -t http://www.target.com http://www.myblog.com/xmlrpc.php

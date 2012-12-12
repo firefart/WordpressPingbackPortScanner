@@ -152,57 +152,63 @@ def generate_requests(xml_rpcs, target)
   end
 end
 
-logo
-
-@verbose = false
-@all_ports = false
-target = "http://localhost"
-xml_rpcs = []
-
 begin
-  opts.each do |opt, arg|
-    case opt
-      when '--help'
-        usage
-      when "--target"
-        if arg !~ /^http/
-          target = "http://" + arg
+  logo
+
+  @verbose = false
+  @all_ports = false
+  target = "http://localhost"
+  xml_rpcs = []
+
+  begin
+    opts.each do |opt, arg|
+      case opt
+        when '--help'
+          usage
+        when "--target"
+          if arg !~ /^http/
+            target = "http://" + arg
+          else
+            target = arg
+          end
+        when "--all-ports"
+          @all_ports = true
+        when "--verbose"
+          @verbose = true
         else
-          target = arg
-        end
-      when "--all-ports"
-        @all_ports = true
-      when "--verbose"
-        @verbose = true
-      else
-        raise("Unknown option #{opt}")
+          raise("Unknown option #{opt}")
+      end
+    end
+  rescue GetoptLong::InvalidOption
+    puts
+    usage
+    exit
+  end
+
+  if ARGV.length == 0
+    puts
+    usage
+    exit 1
+  end
+
+  # Parse XML RPCs
+  ARGV.each do |site|
+    if site !~ /^http/i
+      xml_rpcs << "http://" + site
+    else
+      xml_rpcs << site
     end
   end
-rescue GetoptLong::InvalidOption
-  puts
-  usage
-  exit
+
+  @hydra = Typhoeus::Hydra.new(:max_concurrency => 10)
+
+  puts "Getting valid blog posts for pingback..."
+  hash = get_valid_blog_post(xml_rpcs)
+  puts "Starting portscan..."
+  generate_requests(hash, target)
+  @hydra.run
+rescue => e
+  puts red("[ERROR] #{e.message}")
+  puts red("Trace :")
+  puts red(e.backtrace.join("\n"))
 end
-
-if ARGV.length == 0
-  puts
-  usage
-  exit 1
-end
-
-# Parse XML RPCs
-ARGV.each do |site|
-  if site !~ /^http/i
-    xml_rpcs << "http://" + site
-  else
-    xml_rpcs << site
-  end
-end
-
-@hydra = Typhoeus::Hydra.new(:max_concurrency => 10)
-
-puts "Getting valid blog posts for pingback..."
-hash = get_valid_blog_post(xml_rpcs)
-puts "Starting portscan..."
-generate_requests(hash, target)
-@hydra.run

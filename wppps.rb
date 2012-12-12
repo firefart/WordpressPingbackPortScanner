@@ -5,7 +5,7 @@ require "typhoeus"
 
 opts = GetoptLong.new(
   [ '--help', '-h', "-?", GetoptLong::NO_ARGUMENT ],
-  [ '--target', "-t" , GetoptLong::REQUIRED_ARGUMENT ],
+  [ '--target', "-t" , GetoptLong::OPTIONAL_ARGUMENT ],
   [ '--verbose', "-v" , GetoptLong::NO_ARGUMENT ]
 )
 
@@ -118,13 +118,13 @@ def generate_requests(xml_rpcs, target)
       closed_match = response.body.match(/<value><int>16<\/int><\/value>/i)
       if closed_match.nil?
         puts "Port #{i} is open"
-        if @verbose
-          puts "##################################"
-          puts xml
-          puts response.body
-        end
       else
         puts "Port #{i} is closed"
+      end
+      if @verbose
+        puts "##################################"
+        puts pingback_request.body
+        puts response.body
       end
     end
     @hydra.queue(pingback_request)

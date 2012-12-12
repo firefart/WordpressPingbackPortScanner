@@ -8,6 +8,7 @@ require "typhoeus"
 opts = GetoptLong.new(
   [ '--help', '-h', "-?", GetoptLong::NO_ARGUMENT ],
   [ '--target', "-t" , GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--all-ports', "-a" , GetoptLong::NO_ARGUMENT ],
   [ '--verbose', "-v" , GetoptLong::NO_ARGUMENT ]
 )
 
@@ -18,6 +19,7 @@ def usage
 Usage: wppp.rb [OPTION] ... XMLRPCS
   --help, -h: show help
   --target, -t X: the target to scan - default localhost
+  --all-ports, -a: Scan all ports. Default is to scan only some common ports
   --verbose, -v: verbose
 
   XMLRPCS: a space separated list of XMLRPCs to use for scanning
@@ -126,7 +128,8 @@ def get_valid_blog_post(xml_rpcs)
 end
 
 def generate_requests(xml_rpcs, target)
-  %w(21 22 25 53 80 106 110 143 443 3306 8443 9999).each do |i|
+  port_range = @all_ports ? (0...65535) : %w(21 22 25 53 80 106 110 143 443 3306 8443 9999)
+  port_range.each do |i|
     random = (0...8).map{65.+(rand(26)).chr}.join
     xml_rpc_hash = xml_rpcs.sample
     url = "#{target}:#{i}/#{random}/"
@@ -152,6 +155,7 @@ end
 logo
 
 @verbose = false
+@all_ports = false
 target = "http://localhost"
 xml_rpcs = []
 
@@ -166,6 +170,8 @@ begin
         else
           target = arg
         end
+      when "--all-ports"
+        @all_ports = true
       when "--verbose"
         @verbose = true
       else

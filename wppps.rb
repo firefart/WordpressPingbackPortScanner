@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+#gem 'typhoeus', '= 0.5.3'
+#gem 'typhoeus', '= 0.4.2'
 require "getoptlong"
 require "typhoeus"
 
@@ -55,7 +57,7 @@ def get_pingback_request(xml_rpc, target, blog_post)
   if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
     pingback_request = Typhoeus::Request.new(xml_rpc,
         :followlocation => true,
-        :max_redirects => 10,
+        :maxredirs => 10,
         :timeout => 5000,
         :method => :post,
         :body => pingback_xml
@@ -79,7 +81,7 @@ def get_valid_blog_post(xml_rpcs)
     # Get valid URLs from Wordpress Feed
     feed_url = "#{url}/?feed=rss2"
     if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
-      params = { :followlocation => true, :max_redirects => 10 }
+      params = { :followlocation => true, :maxredirs => 10 }
     else
       params = { :follow_location => true, :max_redirects => 10 }
     end
@@ -122,9 +124,9 @@ def generate_requests(xml_rpcs, target)
         puts "Port #{i} is closed"
       end
       if @verbose
-        puts "##################################"
-        puts pingback_request.body
+        puts response.code
         puts response.body
+        puts "##################################"
       end
     end
     @hydra.queue(pingback_request)

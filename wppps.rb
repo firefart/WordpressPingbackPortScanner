@@ -1,13 +1,5 @@
 #!/usr/bin/env ruby
 
-#
-# Robin Wood - robin@digininja.org
-# Changes:
-# * After version 0.5 typhoeus changed the option follow_location to followlocation
-#   for some reason so have to do a version check
-# * Added command line options and usage
-#
-
 require "getoptlong"
 require "typhoeus"
 
@@ -30,6 +22,17 @@ Usage: wppp.rb [OPTION] ... XMLRPCS
 
 "
   exit
+end
+
+def logo
+puts "   _      __            __                       ___  _           __            __"
+puts "  | | /| / /__  _______/ /__  _______ ___ ___   / _ \\(_)__  ___ _/ /  ___ _____/ /__"
+puts "  | |/ |/ / _ \\/ __/ _  / _ \\/ __/ -_|_-<(_-<  / ___/ / _ \\/ _ `/ _ \\/ _ `/ __/  '_/"
+puts "  |__/|__/\\___/_/  \\_,_/ .__/_/  \\__/___/___/ /_/  /_/_//_/\\_, /_.__/\\_,_/\\__/_/\\_\\ "
+puts "     ___           __  /_/___                              /___/                     "
+puts "    / _ \\___  ____/ /_  / __/______ ____  ___  ___ ____                              "
+puts "   / ___/ _ \\/ __/ __/ _\\ \\/ __/ _ `/ _ \\/ _ \\/ -_) __/                              "
+puts "  /_/   \\___/_/  \\__/ /___/\\__/\\_,_/_//_/_//_/\\__/_/                                 "
 end
 
 def generate_pingback_xml (target, valid_blog_post)
@@ -117,6 +120,8 @@ def generate_requests(xml_rpcs, target)
     @hydra.queue(pingback_request)
   end
 end
+
+logo
 
 @verbose = false
 target = "http://localhost"

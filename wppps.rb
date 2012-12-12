@@ -72,8 +72,13 @@ def get_valid_blog_post(xml_rpcs)
   xml_rpcs.each do |xml_rpc|
     url = xml_rpc.sub(/\/xmlrpc\.php$/, "")
     # Get valid URLs from Wordpress Feed
-    feed_url = "#{url}/feed/"
-    response = Typhoeus::Request.get(feed_url)
+    feed_url = "#{url}/?feed=rss2"
+    if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
+      params = { :followlocation => true }
+    else
+      params = { :follow_location => true }
+    end
+    response = Typhoeus::Request.get(feed_url, params)
     links = response.body.scan(/<link>([^<]+)<\/link>/i)
     if response.code != 200 or links.nil?
       raise("No valid blog posts found for xmlrpc #{xml_rpc}")

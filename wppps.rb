@@ -25,14 +25,17 @@ Usage: wppp.rb [OPTION] ... XMLRPCS
 end
 
 def logo
-puts "   _      __            __                       ___  _           __            __"
-puts "  | | /| / /__  _______/ /__  _______ ___ ___   / _ \\(_)__  ___ _/ /  ___ _____/ /__"
-puts "  | |/ |/ / _ \\/ __/ _  / _ \\/ __/ -_|_-<(_-<  / ___/ / _ \\/ _ `/ _ \\/ _ `/ __/  '_/"
-puts "  |__/|__/\\___/_/  \\_,_/ .__/_/  \\__/___/___/ /_/  /_/_//_/\\_, /_.__/\\_,_/\\__/_/\\_\\ "
-puts "     ___           __  /_/___                              /___/                     "
-puts "    / _ \\___  ____/ /_  / __/______ ____  ___  ___ ____                              "
-puts "   / ___/ _ \\/ __/ __/ _\\ \\/ __/ _ `/ _ \\/ _ \\/ -_) __/                              "
-puts "  /_/   \\___/_/  \\__/ /___/\\__/\\_,_/_//_/_//_/\\__/_/                                 "
+  puts
+  puts "   _      __            __                       ___  _           __            __"
+  puts "  | | /| / /__  _______/ /__  _______ ___ ___   / _ \\(_)__  ___ _/ /  ___ _____/ /__"
+  puts "  | |/ |/ / _ \\/ __/ _  / _ \\/ __/ -_|_-<(_-<  / ___/ / _ \\/ _ `/ _ \\/ _ `/ __/  '_/"
+  puts "  |__/|__/\\___/_/  \\_,_/ .__/_/  \\__/___/___/ /_/  /_/_//_/\\_, /_.__/\\_,_/\\__/_/\\_\\ "
+  puts "     ___           __  /_/___                              /___/                     "
+  puts "    / _ \\___  ____/ /_  / __/______ ____  ___  ___ ____                              "
+  puts "   / ___/ _ \\/ __/ __/ _\\ \\/ __/ _ `/ _ \\/ _ \\/ -_) __/                              "
+  puts "  /_/   \\___/_/  \\__/ /___/\\__/\\_,_/_//_/_//_/\\__/_/                                 "
+  puts
+  puts
 end
 
 def generate_pingback_xml (target, valid_blog_post)
@@ -52,6 +55,7 @@ def get_pingback_request(xml_rpc, target, blog_post)
   if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
     pingback_request = Typhoeus::Request.new(xml_rpc,
         :followlocation => true,
+        :max_redirects => 10,
         :timeout => 5000,
         :method => :post,
         :body => pingback_xml
@@ -59,6 +63,7 @@ def get_pingback_request(xml_rpc, target, blog_post)
   else
     pingback_request = Typhoeus::Request.new(xml_rpc,
         :follow_location => true,
+        :max_redirects => 10,
         :timeout => 5000,
         :method => :post,
         :body => pingback_xml
@@ -74,9 +79,9 @@ def get_valid_blog_post(xml_rpcs)
     # Get valid URLs from Wordpress Feed
     feed_url = "#{url}/?feed=rss2"
     if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
-      params = { :followlocation => true }
+      params = { :followlocation => true, :max_redirects => 10 }
     else
-      params = { :follow_location => true }
+      params = { :follow_location => true, :max_redirects => 10 }
     end
     response = Typhoeus::Request.get(feed_url, params)
     links = response.body.scan(/<link>([^<]+)<\/link>/i)

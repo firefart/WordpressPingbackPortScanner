@@ -105,7 +105,7 @@ def get_valid_blog_post(xml_rpcs)
     end
     response = Typhoeus::Request.get(feed_url, params)
     links = response.body.scan(/<link>([^<]+)<\/link>/i)
-    if response.code != 200 or links.nil?
+    if response.code != 200 or links.nil? or links.empty?
       raise("No valid blog posts found for xmlrpc #{xml_rpc}")
     end
     links.each do |link|

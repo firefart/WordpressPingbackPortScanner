@@ -76,7 +76,7 @@ def get_pingback_request(xml_rpc, target, blog_post)
     pingback_request = Typhoeus::Request.new(xml_rpc,
         :followlocation => true,
         :maxredirs => 10,
-        :timeout => 5000,
+        :timeout => 10000,
         :method => :post,
         :body => pingback_xml
     )
@@ -84,7 +84,7 @@ def get_pingback_request(xml_rpc, target, blog_post)
     pingback_request = Typhoeus::Request.new(xml_rpc,
         :follow_location => true,
         :max_redirects => 10,
-        :timeout => 5000,
+        :timeout => 10000,
         :method => :post,
         :body => pingback_xml
     )
@@ -128,7 +128,7 @@ def get_valid_blog_post(xml_rpcs)
 end
 
 def generate_requests(xml_rpcs, target)
-  port_range = @all_ports ? (0...65535) : %w(21 22 25 53 80 106 110 143 443 3306 8443 9999)
+  port_range = @all_ports ? (0...65535) : %w(21 22 25 53 80 106 110 143 443 3306 3389 8443 9999)
   port_range.each do |i|
     random = (0...8).map{65.+(rand(26)).chr}.join
     xml_rpc_hash = xml_rpcs.sample

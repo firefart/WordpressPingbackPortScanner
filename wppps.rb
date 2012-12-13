@@ -132,18 +132,20 @@ def generate_requests(xml_rpcs, target)
   port_range.each do |i|
     random = (0...8).map{65.+(rand(26)).chr}.join
     xml_rpc_hash = xml_rpcs.sample
-    url = "#{target}:#{i}/#{random}/"
+    domain = i == "443" ? target.sub(/^http:\/\//i, "https://") : target
+    url = "#{domain}:#{i}/#{random}/"
     pingback_request = get_pingback_request(xml_rpc_hash[:xml_rpc], url, xml_rpc_hash[:blog_post])
     pingback_request.on_complete do |response|
       # Closed: <value><int>16</int></value>
       closed_match = response.body.match(/<value><int>16<\/int><\/value>/i)
-      if closed_match.nil?
+      if response.code == 200 and closed_match.nil?
         puts green("Port #{i} is open")
       else
         puts yellow("Port #{i} is closed")
       end
       if @verbose
-        puts response.code
+        puts "URL: #{url}"
+        puts "Response Code: #{response.code}"
         puts response.body
         puts "##################################"
       end

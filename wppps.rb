@@ -124,6 +124,11 @@ def get_valid_blog_post(xml_rpcs)
       end
     end
   end
+
+  if blog_posts.nil? or blog_posts.empty?
+    raise("No valid posts with pingback enabled found")
+  end
+
   blog_posts
 end
 

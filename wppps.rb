@@ -70,6 +70,30 @@ def generate_pingback_xml (target, valid_blog_post)
   xml
 end
 
+def get_xml_rpc_url(url)
+  if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
+    resp = Typhoeus::Request.head(url,
+                                  :followlocation => true,
+                                  :maxredirs => 10,
+                                  :timeout => 5000,
+    )
+  else
+    resp = Typhoeus::Request.head(url,
+                                  :follow_location => true,
+                                  :max_redirects => 10,
+                                  :timeout => 5000,
+    )
+  end
+  headers = resp.headers_hash
+  value = headers["x-pingback"]
+  if value.nil? or value.empty?
+    raise("Url #{url} does not provide a XML-RPC url")
+  else
+    xmlrpc_url = value
+  end
+  xmlrpc_url
+end
+
 def get_pingback_request(xml_rpc, target, blog_post)
   pingback_xml = generate_pingback_xml(target, blog_post)
   if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
@@ -200,11 +224,14 @@ begin
 
   # Parse XML RPCs
   ARGV.each do |site|
-    if site !~ /^http/i
-      xml_rpcs << "http://" + site
-    else
-      xml_rpcs << site
-    end
+    url_cleanup = site.sub(/\/xmlrpc\.php$/i, "/")
+    # add trailing slash
+    url_cleanup =~ /\/$/ ? url_cleanup : "#{url_cleanup}/"
+    xml_rpcs << get_xml_rpc_url(url_cleanup)
+  end
+
+  if xml_rpcs.nil? or xml_rpcs.empty?
+    raise("No valid XML-RPC interfaces found")
   end
 
   @hydra = Typhoeus::Hydra.new(:max_concurrency => 10)

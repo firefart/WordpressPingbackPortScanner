@@ -76,13 +76,13 @@ def get_xml_rpc_url(url)
     resp = Typhoeus::Request.head(url,
                                   :followlocation => true,
                                   :maxredirs => 10,
-                                  :timeout => 5000,
+                                  :timeout => 5000
     )
   else
     resp = Typhoeus::Request.head(url,
                                   :follow_location => true,
                                   :max_redirects => 10,
-                                  :timeout => 5000,
+                                  :timeout => 5000
     )
   end
   headers = resp.headers_hash

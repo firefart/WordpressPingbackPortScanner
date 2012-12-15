@@ -158,13 +158,13 @@ def get_valid_blog_post(xml_rpcs)
 end
 
 def generate_requests(xml_rpcs, target)
-  port_range = @all_ports ? (0...65535) : %w(21 22 25 53 80 106 110 143 443 3306 3389 8443 9999)
+  port_range = @all_ports ? (0...65535) : [21, 22, 25, 53, 80, 106, 110, 143, 443, 3306, 3389, 8443, 9999]
   port_range.each do |i|
     random = (0...8).map{65.+(rand(26)).chr}.join
     xml_rpc_hash = xml_rpcs.sample
     uri = URI(target)
-    uri.port = i.to_i
-    uri.scheme = i == "443" ? "https" : "http"
+    uri.port = i
+    uri.scheme = i == 443 ? "https" : "http"
     uri.path = "/#{random}/"
     pingback_request = get_pingback_request(xml_rpc_hash[:xml_rpc], uri.to_s, xml_rpc_hash[:blog_post])
     pingback_request.on_complete do |response|

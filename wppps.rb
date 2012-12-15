@@ -16,13 +16,13 @@ opts = GetoptLong.new(
 def usage
   puts"Wordpress Pingback Port Scanner
 
-Usage: wppp.rb [OPTION] ... XMLRPCS
+Usage: wppp.rb [OPTION] ... TARGETS
   --help, -h: show help
   --target, -t X: the target to scan - default localhost
   --all-ports, -a: Scan all ports. Default is to scan only some common ports
   --verbose, -v: verbose
 
-  XMLRPCS: a space separated list of XMLRPCs to use for scanning
+  TARGETS: a space separated list of targets to use for scanning (must provide a XML-RPC Url)
 
 "
   exit

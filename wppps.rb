@@ -4,6 +4,7 @@
 #gem 'typhoeus', '= 0.4.2'
 require "getoptlong"
 require "typhoeus"
+require "uri"
 
 opts = GetoptLong.new(
   [ '--help', '-h', "-?", GetoptLong::NO_ARGUMENT ],
@@ -161,9 +162,11 @@ def generate_requests(xml_rpcs, target)
   port_range.each do |i|
     random = (0...8).map{65.+(rand(26)).chr}.join
     xml_rpc_hash = xml_rpcs.sample
-    domain = i == "443" ? target.sub(/^http:\/\//i, "https://") : target
-    url = "#{domain}:#{i}/#{random}/"
-    pingback_request = get_pingback_request(xml_rpc_hash[:xml_rpc], url, xml_rpc_hash[:blog_post])
+    uri = URI(target)
+    uri.port = i.to_i
+    uri.scheme = i == "443" ? "https" : "http"
+    uri.path = "/#{random}/"
+    pingback_request = get_pingback_request(xml_rpc_hash[:xml_rpc], uri.to_s, xml_rpc_hash[:blog_post])
     pingback_request.on_complete do |response|
       # Closed: <value><int>16</int></value>
       closed_match = response.body.match(/<value><int>16<\/int><\/value>/i)
@@ -173,7 +176,8 @@ def generate_requests(xml_rpcs, target)
         puts yellow("Port #{i} is closed")
       end
       if @verbose
-        puts "URL: #{url}"
+        puts "URL: #{uri.to_s}"
+        puts "XMLRPC: #{xml_rpc_hash[:xml_rpc]}"
         puts "Response Code: #{response.code}"
         puts response.body
         puts "##################################"

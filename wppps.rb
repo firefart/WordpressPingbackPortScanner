@@ -7,10 +7,10 @@ require "typhoeus"
 require "uri"
 
 opts = GetoptLong.new(
-  [ '--help', '-h', "-?", GetoptLong::NO_ARGUMENT ],
-  [ '--target', "-t" , GetoptLong::OPTIONAL_ARGUMENT ],
-  [ '--all-ports', "-a" , GetoptLong::NO_ARGUMENT ],
-  [ '--verbose', "-v" , GetoptLong::NO_ARGUMENT ]
+    ['--help', '-h', "-?", GetoptLong::NO_ARGUMENT],
+    ['--target', "-t", GetoptLong::OPTIONAL_ARGUMENT],
+    ['--all-ports', "-a", GetoptLong::NO_ARGUMENT],
+    ['--verbose', "-v", GetoptLong::NO_ARGUMENT]
 )
 
 # Display the usage
@@ -99,19 +99,19 @@ def get_pingback_request(xml_rpc, target, blog_post)
   pingback_xml = generate_pingback_xml(target, blog_post)
   if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
     pingback_request = Typhoeus::Request.new(xml_rpc,
-        :followlocation => true,
-        :maxredirs => 10,
-        :timeout => 10000,
-        :method => :post,
-        :body => pingback_xml
+                                             :followlocation => true,
+                                             :maxredirs => 10,
+                                             :timeout => 10000,
+                                             :method => :post,
+                                             :body => pingback_xml
     )
   else
     pingback_request = Typhoeus::Request.new(xml_rpc,
-        :follow_location => true,
-        :max_redirects => 10,
-        :timeout => 10000,
-        :method => :post,
-        :body => pingback_xml
+                                             :follow_location => true,
+                                             :max_redirects => 10,
+                                             :timeout => 10000,
+                                             :method => :post,
+                                             :body => pingback_xml
     )
   end
   pingback_request
@@ -124,9 +124,9 @@ def get_valid_blog_post(xml_rpcs)
     # Get valid URLs from Wordpress Feed
     feed_url = "#{url}/?feed=rss2"
     if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
-      params = { :followlocation => true, :maxredirs => 10 }
+      params = {:followlocation => true, :maxredirs => 10}
     else
-      params = { :follow_location => true, :max_redirects => 10 }
+      params = {:follow_location => true, :max_redirects => 10}
     end
     response = Typhoeus::Request.get(feed_url, params)
     links = response.body.scan(/<link>([^<]+)<\/link>/i)
@@ -160,7 +160,7 @@ end
 def generate_requests(xml_rpcs, target)
   port_range = @all_ports ? (0...65535) : [21, 22, 25, 53, 80, 106, 110, 143, 443, 3306, 3389, 8443, 9999]
   port_range.each do |i|
-    random = (0...8).map{65.+(rand(26)).chr}.join
+    random = (0...8).map { 65.+(rand(26)).chr }.join
     xml_rpc_hash = xml_rpcs.sample
     uri = URI(target)
     uri.port = i

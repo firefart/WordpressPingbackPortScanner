@@ -10,15 +10,15 @@ Examples
 --------
 Quick-scan a target via a blog:
 ```
-ruby wppps.rb -t http://www.target.com http://www.myblog.com/xmlrpc.php
+ruby wppps.rb -t http://www.target.com http://www.myblog.com/
 ```
 
 Use multiple blogs to scan a single target:
 ```
-ruby wppps.rb -t http://www.target.com http://www.myblog1.com/xmlrpc.php http://www.myblog2.com/xmlrpc.php http://www.myblog3.com/xmlrpc.php
+ruby wppps.rb -t http://www.target.com http://www.myblog1.com/ http://www.myblog2.com/ http://www.myblog3.com/
 ```
 
 Scan a free wordpress.com blog (all ports) from the internal network:
 ```
-ruby wppps.rb -a -t http://localhost http://myblog.wordpress.com/xmlrpc.php
+ruby wppps.rb -a -t http://localhost http://myblog.wordpress.com/
 ```

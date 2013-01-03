@@ -1,16 +1,16 @@
 #!/usr/bin/env ruby
 
-#gem 'typhoeus', '= 0.5.3'
-#gem 'typhoeus', '= 0.4.2'
+#gem "typhoeus", "= 0.5.3"
+#gem "typhoeus", "= 0.4.2"
 require "getoptlong"
 require "typhoeus"
 require "uri"
 
 opts = GetoptLong.new(
-    ['--help', '-h', "-?", GetoptLong::NO_ARGUMENT],
-    ['--target', "-t", GetoptLong::OPTIONAL_ARGUMENT],
-    ['--all-ports', "-a", GetoptLong::NO_ARGUMENT],
-    ['--verbose', "-v", GetoptLong::NO_ARGUMENT]
+    ["--help", "-h", "-?", GetoptLong::NO_ARGUMENT],
+    ["--target", "-t", GetoptLong::OPTIONAL_ARGUMENT],
+    ["--all-ports", "-a", GetoptLong::NO_ARGUMENT],
+    ["--verbose", "-v", GetoptLong::NO_ARGUMENT]
 )
 
 # Display the usage
@@ -198,7 +198,7 @@ begin
   begin
     opts.each do |opt, arg|
       case opt
-        when '--help'
+        when "--help"
           usage
         when "--target"
           if arg !~ /^http/

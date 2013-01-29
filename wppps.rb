@@ -2,9 +2,14 @@
 
 #gem "typhoeus", "= 0.5.3"
 #gem "typhoeus", "= 0.4.2"
+require "rubygems"
 require "getoptlong"
 require "typhoeus"
 require "uri"
+
+class Array
+  alias_method :sample, :choice unless method_defined?(:sample)
+end
 
 opts = GetoptLong.new(
     ["--help", "-h", "-?", GetoptLong::NO_ARGUMENT],

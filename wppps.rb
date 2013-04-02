@@ -91,13 +91,45 @@ def get_xml_rpc_url(url)
     )
   end
   headers = resp.headers_hash
+  # Provided by header?
   value = headers["x-pingback"]
   if value.nil? or value.empty?
-    raise("Url #{url} does not provide a XML-RPC url")
+    # Check if the xmlrpc.php file exists
+    if default_xmlrpc_url_exists(url)
+      xmlrpc_url = get_default_xmlrpc_url(url)
+    else
+      raise("Url #{url} does not provide a XML-RPC url")
+    end
   else
     xmlrpc_url = value
   end
   xmlrpc_url
+end
+
+def get_default_xmlrpc_url(url)
+  uri = URI.parse(url)
+  uri.path << "/" if uri.path[-1] != '/'
+  uri.path << "xmlrpc.php"
+  uri.to_s
+end
+
+def default_xmlrpc_url_exists(url)
+  url = get_default_xmlrpc_url(url)
+  if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
+    resp = Typhoeus::Request.get(url,
+                                :followlocation => true,
+                                :maxredirs => 10,
+                                :timeout => 5000
+    )
+  else
+    resp = Typhoeus::Request.get(url,
+                                :follow_location => true,
+                                :max_redirects => 10,
+                                :timeout => 5000
+    )
+  end
+  return true if resp.code == 200 and resp.body =~ /XML-RPC server accepts POST requests only./
+  false
 end
 
 def get_pingback_request(xml_rpc, target, blog_post)
@@ -140,6 +172,7 @@ def get_valid_blog_post(xml_rpcs)
     end
     links.each do |link|
       temp_link = link[0]
+      puts "Trying #{temp_link}.." if @verbose
       # Test if pingback is enabled for extracted link
       pingback_request = get_pingback_request(xml_rpc, "http://www.google.com", temp_link)
       @hydra.queue(pingback_request)
@@ -183,6 +216,8 @@ def generate_requests(xml_rpcs, target)
       if @verbose
         puts "URL: #{uri.to_s}"
         puts "XMLRPC: #{xml_rpc_hash[:xml_rpc]}"
+        puts "Request:"
+        puts pingback_request.body
         puts "Response Code: #{response.code}"
         puts response.body
         puts "##################################"

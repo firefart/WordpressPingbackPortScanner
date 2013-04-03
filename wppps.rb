@@ -61,6 +61,7 @@ def logo
   puts "   / ___/ _ \\/ __/ __/ _\\ \\/ __/ _ `/ _ \\/ _ \\/ -_) __/"
   puts "  /_/   \\___/_/  \\__/ /___/\\__/\\_,_/_//_/_//_/\\__/_/"
   puts
+  puts yellow("Warning: this tool only works with Wordpress versions < 3.5.1")
   puts
 end
 
@@ -208,7 +209,7 @@ def generate_requests(xml_rpcs, target)
     pingback_request.on_complete do |response|
       # Closed: <value><int>16</int></value>
       closed_match = response.body.match(/<value><int>16<\/int><\/value>/i)
-      if response.code == 200 and closed_match.nil?
+      if response.code == 200 and closed_match.nil? and response.body !~ /XML-RPC server accepts POST requests only./
         puts green("Port #{i} is open")
       else
         puts yellow("Port #{i} is closed")
@@ -217,7 +218,11 @@ def generate_requests(xml_rpcs, target)
         puts "URL: #{uri.to_s}"
         puts "XMLRPC: #{xml_rpc_hash[:xml_rpc]}"
         puts "Request:"
-        puts pingback_request.body
+        if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
+          puts pingback_request.options[:body]
+        else
+          puts pingback_request.body
+        end
         puts "Response Code: #{response.code}"
         puts response.body
         puts "##################################"

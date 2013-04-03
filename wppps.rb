@@ -77,7 +77,7 @@ def generate_pingback_xml (target, valid_blog_post)
   xml
 end
 
-def get_xml_rpc_url(url)
+def xml_rpc_url_from_headers(url)
   if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
     resp = Typhoeus::Request.head(url,
                                   :followlocation => true,
@@ -92,34 +92,15 @@ def get_xml_rpc_url(url)
     )
   end
   headers = resp.headers_hash
-  # Provided by header?
-  value = headers["x-pingback"]
-  if value.nil? or value.empty?
-    # Check if the xmlrpc.php file exists
-    if default_xmlrpc_url_exists(url)
-      xmlrpc_url = get_default_xmlrpc_url(url)
-    else
-      raise("Url #{url} does not provide a XML-RPC url")
-    end
-  else
-    xmlrpc_url = value
-  end
-  xmlrpc_url
+  # Provided by header? Otherwise return nil
+  headers["x-pingback"]
 end
 
-def get_default_xmlrpc_url(url)
-  uri = URI.parse(url)
-  uri.path << "/" if uri.path[-1] != '/'
-  uri.path << "xmlrpc.php"
-  uri.to_s
-end
-
-def default_xmlrpc_url_exists(url)
-  url = get_default_xmlrpc_url(url)
+def xml_rpc_url_from_body(url)
   if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
     resp = Typhoeus::Request.get(url,
                                 :followlocation => true,
-                                :maxredirs => 10,
+                                 :maxredirs => 10,
                                 :timeout => 5000
     )
   else
@@ -129,8 +110,53 @@ def default_xmlrpc_url_exists(url)
                                 :timeout => 5000
     )
   end
-  return true if resp.code == 200 and resp.body =~ /XML-RPC server accepts POST requests only./
-  false
+  # Get URL from body, return nil if not present
+  resp.body[%r{<link rel="pingback" href="([^"]+)" ?\/?>}, 1]
+end
+
+def xml_rpc_url_from_default(url)
+  url = get_default_xmlrpc_url(url)
+  if Gem.loaded_specs["typhoeus"].version >= Gem::Version.create(0.5)
+    resp = Typhoeus::Request.get(url,
+                                 :followlocation => true,
+                                 :maxredirs => 10,
+                                 :timeout => 5000
+    )
+  else
+    resp = Typhoeus::Request.get(url,
+                                 :follow_location => true,
+                                 :max_redirects => 10,
+                                 :timeout => 5000
+    )
+  end
+  return url if resp.code == 200 and resp.body =~ /XML-RPC server accepts POST requests only./
+  nil
+end
+
+def get_xml_rpc_url(url)
+  xmlrpc_url = xml_rpc_url_from_headers(url)
+  if xmlrpc_url.nil? or xmlrpc_url.empty?
+    xmlrpc_url = xml_rpc_url_from_body(url)
+    if xmlrpc_url.nil? or xmlrpc_url.empty?
+      xmlrpc_url = xml_rpc_url_from_default(url)
+      if xmlrpc_url.nil? or xmlrpc_url.empty?
+        raise("Url #{url} does not provide a XML-RPC url")
+      end
+      puts "Got default XML-RPC Url" if @verbose
+    else
+      puts "Got XML-RPC Url from Body" if @verbose
+    end
+  else
+    puts "Got XML-RPC Url from Headers" if @verbose
+  end
+  xmlrpc_url
+end
+
+def get_default_xmlrpc_url(url)
+  uri = URI.parse(url)
+  uri.path << "/" if uri.path[-1] != '/'
+  uri.path << "xmlrpc.php"
+  uri.to_s
 end
 
 def get_pingback_request(xml_rpc, target, blog_post)

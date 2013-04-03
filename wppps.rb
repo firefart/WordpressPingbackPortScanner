@@ -222,6 +222,16 @@ def get_valid_blog_post(xml_rpcs)
   blog_posts
 end
 
+def is_port_open?(response)
+  # see wp-includes/class-wp-xmlrpc-server.php#pingback_ping($args) for error codes
+  # open 17: The source URL does not contain a link to the target URL, and so cannot be used as a source.
+  # open 32: We cannot find a title on that page.
+  # closed 16: The source URL does not exist.
+  open_match = response.body.match(/<value><int>(17|32)<\/int><\/value>/i)
+  return true if response.code == 200 and open_match
+  false
+end
+
 def generate_requests(xml_rpcs, target)
   port_range = @all_ports ? (0...65535) : [21, 22, 25, 53, 80, 106, 110, 143, 443, 3306, 3389, 8443, 9999]
   port_range.each do |i|
@@ -233,9 +243,7 @@ def generate_requests(xml_rpcs, target)
     uri.path = "/#{random}/"
     pingback_request = get_pingback_request(xml_rpc_hash[:xml_rpc], uri.to_s, xml_rpc_hash[:blog_post])
     pingback_request.on_complete do |response|
-      # Closed: <value><int>16</int></value>
-      closed_match = response.body.match(/<value><int>16<\/int><\/value>/i)
-      if response.code == 200 and closed_match.nil? and response.body !~ /XML-RPC server accepts POST requests only./
+      if is_port_open?(response)
         puts green("Port #{i} is open")
       else
         puts yellow("Port #{i} is closed")

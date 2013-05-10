@@ -31,7 +31,6 @@ Usage: wppp.rb [OPTION] ... TARGETS
   TARGETS: a space separated list of targets to use for scanning (must provide a XML-RPC Url)
 
 "
-  exit
 end
 
 def colorize(text, color_code)
@@ -274,11 +273,15 @@ begin
   target = "http://localhost"
   xml_rpcs = []
 
+  # Fix for issue #4
+  arguments = ARGV.dup
+
   begin
     opts.each do |opt, arg|
       case opt
         when "--help"
           usage
+          exit 0
         when "--target"
           if arg !~ /^http/
             target = "http://" + arg
@@ -296,10 +299,8 @@ begin
   rescue GetoptLong::InvalidOption
     puts
     usage
-    exit
+    exit 1
   end
-
-  arguments = ARGV.dup
 
   if arguments.length == 0
     puts

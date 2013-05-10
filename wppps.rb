@@ -299,14 +299,16 @@ begin
     exit
   end
 
-  if ARGV.length == 0
+  arguments = ARGV.dup
+
+  if arguments.length == 0
     puts
     usage
     exit 1
   end
 
   # Parse XML RPCs
-  ARGV.each do |site|
+  arguments.each do |site|
     url_cleanup = site.sub(/\/xmlrpc\.php$/i, "/")
     # add trailing slash
     url_cleanup =~ /\/$/ ? url_cleanup : "#{url_cleanup}/"

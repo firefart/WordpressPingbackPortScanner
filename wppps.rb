@@ -40,6 +40,7 @@ def logo
   puts '  /_/   \\___/_/  \\__/ /___/\\__/\\_,_/_//_/_//_/\\__/_/'
   puts
   puts yellow('Warning: this tool only works with Wordpress versions < 3.5.1')
+  puts yellow('To determine your Wordpress version you can use WPScan http://wpscan.org/')
   puts
 end
 

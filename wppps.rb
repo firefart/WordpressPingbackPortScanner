@@ -292,6 +292,10 @@ begin
       @options.verbose = value
     end
 
+    opts.on('-d', '--debug', 'Enable debug output') do |value|
+      Typhoeus::Config.verbose = value
+    end
+
     opts.separator ''
     opts.separator 'VICTIMS: a space separated list of victims to use for scanning (must provide a XML-RPC Url)'
     opts.separator ''

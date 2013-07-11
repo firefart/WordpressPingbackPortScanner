@@ -61,13 +61,15 @@ def xml_rpc_url_from_headers(url)
     resp = Typhoeus::Request.head(url,
                                   :followlocation => true,
                                   :maxredirs => 10,
-                                  :timeout => 5000
+                                  :timeout => 5000,
+                                  :headers => {'User-Agent' => @options.useragent}
     )
   else
     resp = Typhoeus::Request.head(url,
                                   :follow_location => true,
                                   :max_redirects => 10,
-                                  :timeout => 5000
+                                  :timeout => 5000,
+                                  :headers => {'User-Agent' => @options.useragent}
     )
   end
   headers = resp.headers_hash
@@ -80,13 +82,15 @@ def xml_rpc_url_from_body(url)
     resp = Typhoeus::Request.get(url,
                                 :followlocation => true,
                                  :maxredirs => 10,
-                                :timeout => 5000
+                                :timeout => 5000,
+                                :headers => {'User-Agent' => @options.useragent}
     )
   else
     resp = Typhoeus::Request.get(url,
                                 :follow_location => true,
                                 :max_redirects => 10,
-                                :timeout => 5000
+                                :timeout => 5000,
+                                :headers => {'User-Agent' => @options.useragent}
     )
   end
   # Get URL from body, return nil if not present
@@ -99,13 +103,15 @@ def xml_rpc_url_from_default(url)
     resp = Typhoeus::Request.get(url,
                                  :followlocation => true,
                                  :maxredirs => 10,
-                                 :timeout => 5000
+                                 :timeout => 5000,
+                                 :headers => {'User-Agent' => @options.useragent}
     )
   else
     resp = Typhoeus::Request.get(url,
                                  :follow_location => true,
                                  :max_redirects => 10,
-                                 :timeout => 5000
+                                 :timeout => 5000,
+                                 :headers => {'User-Agent' => @options.useragent}
     )
   end
   return url if resp.code == 200 and resp.body =~ /XML-RPC server accepts POST requests only./
@@ -146,7 +152,8 @@ def get_pingback_request(xml_rpc, target, blog_post)
                                              :maxredirs => 10,
                                              :timeout => 10000,
                                              :method => :post,
-                                             :body => pingback_xml
+                                             :body => pingback_xml,
+                                             :headers => {'User-Agent' => @options.useragent}
     )
   else
     pingback_request = Typhoeus::Request.new(xml_rpc,
@@ -154,7 +161,8 @@ def get_pingback_request(xml_rpc, target, blog_post)
                                              :max_redirects => 10,
                                              :timeout => 10000,
                                              :method => :post,
-                                             :body => pingback_xml
+                                             :body => pingback_xml,
+                                             :headers => {'User-Agent' => @options.useragent}
     )
   end
   pingback_request
@@ -171,6 +179,7 @@ def get_valid_blog_post(xml_rpcs)
     else
       params = {:follow_location => true, :max_redirects => 10}
     end
+    params.merge!(:headers => {'User-Agent' => @options.useragent})
     response = Typhoeus::Request.get(feed_url, params)
     links = response.body.scan(/<link>([^<]+)<\/link>/i)
     if response.code != 200 or links.nil? or links.empty?
@@ -254,6 +263,7 @@ begin
   @options.target = 'http://localhost'
   @options.all_ports = false
   @options.verbose = false
+  @options.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0'
 
   opt_parser = OptionParser.new do |opts|
     opts.banner = "Usage: ruby #{opts.program_name}.rb [OPTION] ... VICTIMS"
@@ -268,6 +278,10 @@ begin
       else
         @options.target = value
       end
+    end
+
+    opts.on('-u', '--user-agent USERAGENT', 'send custom User-Agent header') do |value|
+      @options.useragent = value
     end
 
     opts.on('-a', '--all-ports', 'Scan all ports. Default is to scan only some common ports') do |value|

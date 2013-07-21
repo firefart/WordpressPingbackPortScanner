@@ -10,6 +10,12 @@ if the XML-RPC Interface is active.
 
 Examples
 --------
+Before you start you need to install all dependencies with
+```
+gem install bundler
+bundle install
+```
+
 Quick-scan a target via a blog:
 ```
 ruby wppps.rb -t http://www.target.com http://www.myblog.com/

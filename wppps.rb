@@ -1,8 +1,5 @@
 #!/usr/bin/env ruby
 
-#gem "typhoeus", "= 0.5.3"
-#gem "typhoeus", "= 0.4.2"
-require 'rubygems'
 require 'optparse'
 require 'typhoeus'
 require 'uri'
@@ -57,63 +54,36 @@ def generate_pingback_xml (target, valid_blog_post)
 end
 
 def xml_rpc_url_from_headers(url)
-  if Gem.loaded_specs['typhoeus'].version >= Gem::Version.create(0.5)
-    resp = Typhoeus::Request.head(url,
-                                  :followlocation => true,
-                                  :maxredirs => 10,
-                                  :timeout => 5000,
-                                  :headers => {'User-Agent' => @options.useragent}
-    )
-  else
-    resp = Typhoeus::Request.head(url,
-                                  :follow_location => true,
-                                  :max_redirects => 10,
-                                  :timeout => 5000,
-                                  :headers => {'User-Agent' => @options.useragent}
-    )
-  end
+  resp = Typhoeus::Request.head(url,
+                                :followlocation => true,
+                                :maxredirs => 10,
+                                :timeout => 5000,
+                                :headers => {'User-Agent' => @options.useragent}
+  )
   headers = resp.headers_hash
   # Provided by header? Otherwise return nil
   headers['x-pingback']
 end
 
 def xml_rpc_url_from_body(url)
-  if Gem.loaded_specs['typhoeus'].version >= Gem::Version.create(0.5)
-    resp = Typhoeus::Request.get(url,
-                                :followlocation => true,
-                                 :maxredirs => 10,
-                                :timeout => 5000,
-                                :headers => {'User-Agent' => @options.useragent}
-    )
-  else
-    resp = Typhoeus::Request.get(url,
-                                :follow_location => true,
-                                :max_redirects => 10,
-                                :timeout => 5000,
-                                :headers => {'User-Agent' => @options.useragent}
-    )
-  end
+  resp = Typhoeus::Request.get(url,
+                               :followlocation => true,
+                               :maxredirs => 10,
+                               :timeout => 5000,
+                               :headers => {'User-Agent' => @options.useragent}
+  )
   # Get URL from body, return nil if not present
   resp.body[%r{<link rel="pingback" href="([^"]+)" ?\/?>}, 1]
 end
 
 def xml_rpc_url_from_default(url)
   url = get_default_xmlrpc_url(url)
-  if Gem.loaded_specs['typhoeus'].version >= Gem::Version.create(0.5)
-    resp = Typhoeus::Request.get(url,
-                                 :followlocation => true,
-                                 :maxredirs => 10,
-                                 :timeout => 5000,
-                                 :headers => {'User-Agent' => @options.useragent}
-    )
-  else
-    resp = Typhoeus::Request.get(url,
-                                 :follow_location => true,
-                                 :max_redirects => 10,
-                                 :timeout => 5000,
-                                 :headers => {'User-Agent' => @options.useragent}
-    )
-  end
+  resp = Typhoeus::Request.get(url,
+                               :followlocation => true,
+                               :maxredirs => 10,
+                               :timeout => 5000,
+                               :headers => {'User-Agent' => @options.useragent}
+  )
   return url if resp.code == 200 and resp.body =~ /XML-RPC server accepts POST requests only./
   nil
 end
@@ -146,26 +116,14 @@ end
 
 def get_pingback_request(xml_rpc, target, blog_post)
   pingback_xml = generate_pingback_xml(target, blog_post)
-  if Gem.loaded_specs['typhoeus'].version >= Gem::Version.create(0.5)
-    pingback_request = Typhoeus::Request.new(xml_rpc,
-                                             :followlocation => true,
-                                             :maxredirs => 10,
-                                             :timeout => 10000,
-                                             :method => :post,
-                                             :body => pingback_xml,
-                                             :headers => {'User-Agent' => @options.useragent}
-    )
-  else
-    pingback_request = Typhoeus::Request.new(xml_rpc,
-                                             :follow_location => true,
-                                             :max_redirects => 10,
-                                             :timeout => 10000,
-                                             :method => :post,
-                                             :body => pingback_xml,
-                                             :headers => {'User-Agent' => @options.useragent}
-    )
-  end
-  pingback_request
+  Typhoeus::Request.new(xml_rpc,
+                        :followlocation => true,
+                        :maxredirs => 10,
+                        :timeout => 10000,
+                        :method => :post,
+                        :body => pingback_xml,
+                        :headers => {'User-Agent' => @options.useragent}
+  )
 end
 
 def get_valid_blog_post(xml_rpcs)
@@ -174,12 +132,7 @@ def get_valid_blog_post(xml_rpcs)
     url = xml_rpc.sub(/\/xmlrpc\.php$/, '')
     # Get valid URLs from Wordpress Feed
     feed_url = "#{url}/?feed=rss2"
-    if Gem.loaded_specs['typhoeus'].version >= Gem::Version.create(0.5)
-      params = {:followlocation => true, :maxredirs => 10}
-    else
-      params = {:follow_location => true, :max_redirects => 10}
-    end
-    params.merge!(:headers => {'User-Agent' => @options.useragent})
+    params = {:followlocation => true, :maxredirs => 10, :headers => {'User-Agent' => @options.useragent}}
     response = Typhoeus::Request.get(feed_url, params)
     links = response.body.scan(/<link>([^<]+)<\/link>/i)
     if response.code != 200 or links.nil? or links.empty?
@@ -240,11 +193,7 @@ def generate_requests(xml_rpcs, target)
         puts "URL: #{uri.to_s}"
         puts "XMLRPC: #{xml_rpc_hash[:xml_rpc]}"
         puts 'Request:'
-        if Gem.loaded_specs['typhoeus'].version >= Gem::Version.create(0.5)
-          puts pingback_request.options[:body]
-        else
-          puts pingback_request.body
-        end
+        puts pingback_request.options[:body]
         puts "Response Code: #{response.code}"
         puts response.body
         puts '##################################'

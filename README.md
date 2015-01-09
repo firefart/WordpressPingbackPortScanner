@@ -8,6 +8,8 @@ You can scan a single host using multiple Wordpress Blogs exposing this API.
 This issue was fixed in Wordpress 3.5.1. Older versions are vulnerable,
 if the XML-RPC Interface is active.
 
+http://www.acunetix.com/blog/web-security-zone/wordpress-pingback-vulnerability/
+
 Examples
 --------
 Before you start you need to install all dependencies with

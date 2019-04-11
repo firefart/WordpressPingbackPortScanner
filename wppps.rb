@@ -174,7 +174,7 @@ def is_port_open?(response)
 end
 
 def generate_requests(xml_rpcs, target)
-  port_range = @options.all_ports ? (0...65535) : [21, 22, 25, 53, 80, 106, 110, 143, 443, 3306, 3389, 8443, 9999]
+  port_range = @options.all_ports ? (0...65535) : @options.ports
   port_range.each do |i|
     random = (0...8).map { 65.+(rand(26)).chr }.join
     xml_rpc_hash = xml_rpcs.sample
@@ -211,6 +211,7 @@ begin
   @options = OpenStruct.new
   @options.target = 'http://localhost'
   @options.all_ports = false
+  @options.ports = [21, 22, 25, 53, 80, 106, 110, 143, 443, 3306, 3389, 8443, 9999]
   @options.verbose = false
   @options.useragent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0'
 
@@ -237,6 +238,13 @@ begin
       @options.all_ports = value
     end
 
+    opts.on('-p', '--ports PORTS', 'Scan given ports. Comma separated list and ranges are allowed, e.g. 80,8080,25-30') do |value|
+      ports = value.split(',')
+      ports.map! {|x| x.split('-')}
+      ports.map! {|x| x.length > 1 ? (x[0]..x[1]).to_a : x}
+      @options.ports =  ports.flatten.uniq.map{|x| x.to_i}
+    end
+
     opts.on('-v', '--verbose', 'Enable verbose output') do |value|
       @options.verbose = value
     end
@@ -247,6 +255,7 @@ begin
 
     opts.separator ''
     opts.separator 'VICTIMS: a space separated list of victims to use for scanning (must provide a XML-RPC Url)'
+    opts.separator "Currently defined common ports: #{@options.ports.join(', ')}"
     opts.separator ''
 
   end
